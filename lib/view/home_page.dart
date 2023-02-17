@@ -37,40 +37,50 @@ class _HomePageState extends State<HomePage> {
         visible: isLoading,
         replacement: RefreshIndicator(
           onRefresh: fetch,
-          child: ListView.builder(
-              itemCount: doctors.length,
-              itemBuilder: (context, index) {
-                final docs = doctors[index] as Map;
-                final id = docs['id'].toString();
-                return ListTile(
-                  title: Text('${docs['name']}  ${docs['surname']}'),
-                  leading: CircleAvatar(child: Text('${index + 1}')),
-                  subtitle: Text(docs['birthday'].toString()),
-                  trailing: PopupMenuButton(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        navigateToEditPage(docs);
-                        ///open edit page
-                      } else if (value == 'delete') {
-                        ///delete doc
-                        deleteById(id);
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Edit'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text('Delete'),
-                        )
-                      ];
-                    },
-                  ),
-                );
-              }),
+          child: Visibility(
+            visible: doctors.isNotEmpty,
+            replacement: Center(
+              child: Text('List is Empty', style: Theme.of(context).textTheme.headlineLarge,),
+            ),
+            child: ListView.builder(
+                itemCount: doctors.length,
+                padding: const EdgeInsets.all(8),
+                itemBuilder: (context, index) {
+                  final docs = doctors[index] as Map;
+                  final id = docs['id'].toString();
+                  return Card(
+                    child: ListTile(
+                      title: Text('${docs['name']}  ${docs['surname']}'),
+                      leading: CircleAvatar(child: Text('${index + 1}')),
+                      subtitle: Text(docs['birthday'].toString()),
+                      trailing: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            navigateToEditPage(docs);
+
+                            ///open edit page
+                          } else if (value == 'delete') {
+                            ///delete doc
+                            deleteById(id);
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            )
+                          ];
+                        },
+                      ),
+                    ),
+                  );
+                }),
+          ),
         ),
         child: const Center(
           child: CircularProgressIndicator(),
@@ -89,10 +99,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> navigateToListPage() async {
-    final route =  MaterialPageRoute(builder: (context) =>  const AddPage());
+    final route = MaterialPageRoute(builder: (context) => const AddPage());
     await Navigator.push(context, route);
     setState(() {
-isLoading = true;
+      isLoading = true;
     });
     fetch();
   }
@@ -105,10 +115,10 @@ isLoading = true;
     if (response.statusCode == 200) {
       ///Remove doc from the List
       final filtered = doctors.where((element) => element['id'] != id).toList();
-    setState(() {
-      doctors = filtered;
-    });
-     // showSuccessMessage('Deletion Success');
+      setState(() {
+        doctors = filtered;
+      });
+      // showSuccessMessage('Deletion Success');
     } else {
       ///Show error
       showErrorMessage('Deletion Filed');
@@ -146,5 +156,4 @@ isLoading = true;
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
 }
