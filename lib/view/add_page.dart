@@ -41,64 +41,65 @@ class _AddPageState extends State<AddPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            isEdit ? 'Edit' : 'Add',
-          ),
+      appBar: AppBar(
+        title: Text(
+          isEdit ? 'Edit' : 'Add',
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ListView(
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  hintText: 'name',
-                ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: ListView(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                hintText: 'name',
               ),
-              TextField(
-                controller: surnameController,
-                decoration: const InputDecoration(
-                  hintText: 'surname',
-                ),
+            ),
+            TextField(
+              controller: surnameController,
+              decoration: const InputDecoration(
+                hintText: 'surname',
               ),
-              TextField(
-                controller: birthdayController,
-                decoration: const InputDecoration(
-                  hintText: 'Birthday',
-                  icon: Icon(Icons.calendar_month),
-                ),
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(1950),
-                      lastDate: DateTime(2025));
-                  if (pickedDate != null) {
-                    setState(() {
-                      birthdayController.text =
-                          DateFormat('yyyy-MM-dd').format(pickedDate);
-                    });
-                  }
-                },
-                keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: birthdayController,
+              decoration: const InputDecoration(
+                hintText: 'Birthday',
+                icon: Icon(Icons.calendar_month),
               ),
-              TextField(
-                controller: specialityController,
-                decoration: const InputDecoration(
-                  hintText: 'speciality',
-                ),
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1950),
+                    lastDate: DateTime(2025));
+                if (pickedDate != null) {
+                  setState(() {
+                    birthdayController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
+                  });
+                }
+              },
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: specialityController,
+              decoration: const InputDecoration(
+                hintText: 'speciality',
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isEdit ? updateData : submitData,
-                child: Text(
-                  isEdit ? 'Update' : 'Submit',
-                ),
-              )
-            ],
-          ),
-        ));
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: isEdit ? updateData : submitData,
+              child: Text(
+                isEdit ? 'Update' : 'Submit',
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   void updateData() async {
@@ -139,8 +140,6 @@ class _AddPageState extends State<AddPage> {
     } else {
       showErrorMessage('Updation Failed');
     }
-
-
   }
 
   void submitData() async {

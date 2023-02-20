@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:clinic_rest/view/add_patient_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 
 class PatientsPage extends StatefulWidget {
   const PatientsPage({Key? key}) : super(key: key);
@@ -12,19 +12,17 @@ class PatientsPage extends StatefulWidget {
 }
 
 class _PatientsPageState extends State<PatientsPage> {
-
-
   List patients = [];
-
+  bool isLoading = true;
 
   @override
   void initState() {
-    fetch();
+    fetchPatient();
     super.initState();
   }
 
-///Get all
-  Future<void> fetch() async {
+  ///Get all data
+  Future<void> fetchPatient() async {
     const url = 'http://10.0.2.2:8080/clinic/api/patient/all';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
@@ -33,17 +31,49 @@ class _PatientsPageState extends State<PatientsPage> {
       setState(() {
         patients = json;
       });
-      print('Success');
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> deletePats(id) async {
+    ///Delete the doc
+    final url = 'http://10.0.2.2:8080/clinic/api/patient/delete/$id';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    if (response.statusCode == 200) {
+      ///Remove doc from the List
+      final filtered =
+          patients.where((element) => element['id'] != id).toList();
+      setState(() {
+        patients = filtered;
+      });
+      // showSuccessMessage('Deletion Success');
+    } else {
+      ///Show error
+      showErrorMessage('Deletion Filed');
     }
   }
 
-  ///POST
+  Future<void> navigationToPatientEdit(Map pats) async {
+    final route = MaterialPageRoute(builder: (context) => PatientAddPage(todo: pats));
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchPatient();
+  }
 
-///clinic/api/patient/save
-
-
-
-
+  Future<void> navigationToPatientAdd() async {
+    final route =
+        MaterialPageRoute(builder: (context) => const PatientAddPage());
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchPatient();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,47 +86,60 @@ class _PatientsPageState extends State<PatientsPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-          onPressed: (){}, label: const Text('Add a Patient')),
-      body: ListView.builder(
-          itemCount: patients.length,
-          padding: const EdgeInsets.all(8),
-          itemBuilder: (context, index) {
-            final pats = patients[index] as Map;
-            final id = pats['id'].toString();
-            return Card(
-              child: ListTile(
-                title: Text('${pats['name']}  ${pats['surname']}'),
-                leading: CircleAvatar(child: Text('${index + 1}')),
-                subtitle: Text(pats['birthday'].toString()),
-                trailing: PopupMenuButton(
-                  onSelected: (value) {
-                    if (value == 'edit') {
+          onPressed: () {
+            navigationToPatientAdd();
+          },
+          label: const Text('Add a Patient')),
+      body: Visibility(
+        visible: isLoading,
+        replacement: RefreshIndicator(
+          onRefresh: fetchPatient,
+          child: ListView.builder(
+              itemCount: patients.length,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) {
+                final pats = patients[index] as Map;
+                final id = pats['id'].toString();
+                return Card(
+                  child: ListTile(
+                    title: Text('${pats['name']}  ${pats['surname']}'),
+                    leading: CircleAvatar(child: Text('${index + 1}')),
+                    subtitle: Text(pats['birthday'].toString()),
+                    trailing: PopupMenuButton(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          navigationToPatientEdit(pats);
 
-                      ///open edit page
-                    } else if (value == 'delete') {
-                      ///delete doc
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Text('Edit patient'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Delete patient'),
-                      )
-                    ];
-                  },
-                ),
-              ),
-            );
-          }),
+                          ///open edit page
+                        } else if (value == 'delete') {
+                          deletePats(id);
+
+                          ///delete pats
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit patient'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('Delete patient'),
+                          )
+                        ];
+                      },
+                    ),
+                  ),
+                );
+              }),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
-
-
 
   void showSuccessMessage(String message) {
     final snackBar = SnackBar(content: Text(message));
@@ -113,6 +156,4 @@ class _PatientsPageState extends State<PatientsPage> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
-
 }
