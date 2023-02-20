@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:clinic_rest/view/add_page.dart';
+import 'package:clinic_rest/view/patients_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,6 +26,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.perm_contact_calendar_outlined),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientsPage()));
+            },
+          ),
+        ],
         centerTitle: true,
         title: const Text(
           'List',
@@ -40,7 +49,10 @@ class _HomePageState extends State<HomePage> {
           child: Visibility(
             visible: doctors.isNotEmpty,
             replacement: Center(
-              child: Text('List is Empty', style: Theme.of(context).textTheme.headlineLarge,),
+              child: Text(
+                'List is Empty',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
             ),
             child: ListView.builder(
                 itemCount: doctors.length,
@@ -68,11 +80,11 @@ class _HomePageState extends State<HomePage> {
                           return [
                             const PopupMenuItem(
                               value: 'edit',
-                              child: Text('Edit'),
+                              child: Text('Edit doctor'),
                             ),
                             const PopupMenuItem(
                               value: 'delete',
-                              child: Text('Delete'),
+                              child: Text('Delete doctor'),
                             )
                           ];
                         },
