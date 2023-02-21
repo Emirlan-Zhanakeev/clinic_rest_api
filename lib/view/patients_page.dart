@@ -45,10 +45,11 @@ class _PatientsPageState extends State<PatientsPage> {
     if (response.statusCode == 200) {
       ///Remove doc from the List
       final filtered =
-          patients.where((element) => element['id'] != id).toList();
+      patients.where((element) => element['id'] != id).toList();
       setState(() {
         patients = filtered;
       });
+      fetchPatient();
       // showSuccessMessage('Deletion Success');
     } else {
       ///Show error
@@ -57,8 +58,10 @@ class _PatientsPageState extends State<PatientsPage> {
   }
 
   Future<void> navigationToPatientEdit(Map pats) async {
-    final route = MaterialPageRoute(builder: (context) => PatientAddPage(todo: pats));
+    final route =
+        MaterialPageRoute(builder: (context) => PatientAddPage(todo: pats));
     await Navigator.push(context, route);
+
     setState(() {
       isLoading = true;
     });
@@ -74,6 +77,9 @@ class _PatientsPageState extends State<PatientsPage> {
     });
     fetchPatient();
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,13 +114,13 @@ class _PatientsPageState extends State<PatientsPage> {
                     trailing: PopupMenuButton(
                       onSelected: (value) {
                         if (value == 'edit') {
-                          navigationToPatientEdit(pats);
-
                           ///open edit page
+                          navigationToPatientEdit(pats);
                         } else if (value == 'delete') {
-                          deletePats(id);
-
                           ///delete pats
+                          showDialog(context: context, builder: (builder) {
+                          return ShowAlertDialog(id);
+                          });
                         }
                       },
                       itemBuilder: (BuildContext context) {
@@ -156,4 +162,30 @@ class _PatientsPageState extends State<PatientsPage> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+
+  AlertDialog ShowAlertDialog(id) {
+    return AlertDialog(
+      title: const Text('Delete?'),
+      content: const Text(
+          'The content will be deleted forever'),
+      actions: [
+        ElevatedButton(
+          onPressed: ()  {
+            deletePats(id);
+             Navigator.pop(context);
+          },
+          child: const Text('Yes'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('No'),
+        ),
+      ],
+    );
+  }
+
+
+
 }

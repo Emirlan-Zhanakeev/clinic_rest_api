@@ -140,6 +140,8 @@ class _AddPageState extends State<AddPage> {
     } else {
       showErrorMessage('Updation Failed');
     }
+    Navigator.pop(context);
+
   }
 
   void submitData() async {
@@ -175,6 +177,8 @@ class _AddPageState extends State<AddPage> {
     } else {
       showErrorMessage('Creation Failed');
     }
+    Navigator.pop(context);
+
   }
 
   void showSuccessMessage(String message) {

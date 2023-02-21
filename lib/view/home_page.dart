@@ -73,7 +73,9 @@ class _HomePageState extends State<HomePage> {
                             ///open edit page
                           } else if (value == 'delete') {
                             ///delete doc
-                            deleteById(id);
+                            showDialog(context: context, builder: (builder) {
+                              return ShowAlertDialog(id);
+                            });
                           }
                         },
                         itemBuilder: (BuildContext context) {
@@ -130,6 +132,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         doctors = filtered;
       });
+      fetch();
       // showSuccessMessage('Deletion Success');
     } else {
       ///Show error
@@ -168,4 +171,29 @@ class _HomePageState extends State<HomePage> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+
+  AlertDialog ShowAlertDialog(id) {
+    return AlertDialog(
+      title: const Text('Delete?'),
+      content: const Text(
+          'The content will be deleted forever'),
+      actions: [
+        ElevatedButton(
+          onPressed: ()  {
+            deleteById(id);
+            Navigator.pop(context);
+          },
+          child: const Text('Yes'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('No'),
+        ),
+      ],
+    );
+  }
+
+
 }

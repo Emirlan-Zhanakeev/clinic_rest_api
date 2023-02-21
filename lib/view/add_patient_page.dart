@@ -85,6 +85,8 @@ bool isEditPatient = false;
     } else {
       showErrorMessage('Creation Failed');
     }
+    Navigator.pop(context);
+
   }
 
 ///PUT
@@ -122,6 +124,7 @@ bool isEditPatient = false;
     } else {
       showErrorMessage('Updation Failed');
     }
+    Navigator.pop(context);
   }
 
   @override
