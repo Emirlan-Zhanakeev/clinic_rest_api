@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:clinic_rest/services/service.dart';
 import 'package:clinic_rest/view/add_page.dart';
 import 'package:clinic_rest/view/patients_page.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: Icon(Icons.perm_contact_calendar_outlined),
+            icon: const Icon(Icons.perm_contact_calendar_outlined),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientsPage()));
             },
@@ -74,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                           } else if (value == 'delete') {
                             ///delete doc
                             showDialog(context: context, builder: (builder) {
-                              return ShowAlertDialog(id);
+                              return showAlertDialog(id);
                             });
                           }
                         },
@@ -123,10 +124,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> deleteById(String id) async {
     ///Delete the doc
-    final url = 'http://10.0.2.2:8080/clinic/api/doctor/delete/$id';
-    final uri = Uri.parse(url);
-    final response = await http.delete(uri);
-    if (response.statusCode == 200) {
+final isSuccess = await DoctorsService.deleteById(id);
+    if (isSuccess) {
       ///Remove doc from the List
       final filtered = doctors.where((element) => element['id'] != id).toList();
       setState(() {
@@ -141,14 +140,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetch() async {
-    const url = 'http://10.0.2.2:8080/clinic/api/doctor/all';
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body) as List;
+    // const url = 'http://10.0.2.2:8080/clinic/api/doctor/all';
+    // final uri = Uri.parse(url);
+    // final response = await http.get(uri);
+    // if (response.statusCode == 200) {
+    //   final json = jsonDecode(response.body) as List;
+
+    final response = await DoctorsService.fetchDoctors();
+
+    if (response != null ) {
       setState(() {
-        doctors = json;
+        doctors = response;
       });
+    } else {
+      showErrorMessage('Something wrong');
     }
 
     setState(() {
@@ -172,7 +177,7 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  AlertDialog ShowAlertDialog(id) {
+  AlertDialog showAlertDialog(id) {
     return AlertDialog(
       title: const Text('Delete?'),
       content: const Text(
