@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:clinic_rest/services/service.dart';
+import 'package:clinic_rest/services/doctor_service.dart';
 import 'package:clinic_rest/view/add_page.dart';
 import 'package:clinic_rest/view/patients_page.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import '../utils/snackbar_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -31,7 +31,11 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.perm_contact_calendar_outlined),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientsPage()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const PatientsPage(),
+                ),
+              );
             },
           ),
         ],
@@ -42,7 +46,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-          onPressed: navigateToListPage, label: const Text('Add')),
+        onPressed: navigateToListPage,
+        label: const Text('Add'),
+      ),
       body: Visibility(
         visible: isLoading,
         replacement: RefreshIndicator(
@@ -74,9 +80,11 @@ class _HomePageState extends State<HomePage> {
                             ///open edit page
                           } else if (value == 'delete') {
                             ///delete doc
-                            showDialog(context: context, builder: (builder) {
-                              return showAlertDialog(id);
-                            });
+                            showDialog(
+                                context: context,
+                                builder: (builder) {
+                                  return showAlertDialog(id);
+                                });
                           }
                         },
                         itemBuilder: (BuildContext context) {
@@ -124,7 +132,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> deleteById(String id) async {
     ///Delete the doc
-final isSuccess = await DoctorsService.deleteById(id);
+    final isSuccess = await DoctorsService.deleteById(id);
     if (isSuccess) {
       ///Remove doc from the List
       final filtered = doctors.where((element) => element['id'] != id).toList();
@@ -132,28 +140,21 @@ final isSuccess = await DoctorsService.deleteById(id);
         doctors = filtered;
       });
       fetch();
-      // showSuccessMessage('Deletion Success');
     } else {
       ///Show error
-      showErrorMessage('Deletion Filed');
+      showErrorMessage(context, message: 'Something wrong');
     }
   }
 
   Future<void> fetch() async {
-    // const url = 'http://10.0.2.2:8080/clinic/api/doctor/all';
-    // final uri = Uri.parse(url);
-    // final response = await http.get(uri);
-    // if (response.statusCode == 200) {
-    //   final json = jsonDecode(response.body) as List;
-
     final response = await DoctorsService.fetchDoctors();
 
-    if (response != null ) {
+    if (response != null) {
       setState(() {
         doctors = response;
       });
     } else {
-      showErrorMessage('Something wrong');
+      showErrorMessage(context, message: 'Something wrong');
     }
 
     setState(() {
@@ -166,25 +167,13 @@ final isSuccess = await DoctorsService.deleteById(id);
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void showErrorMessage(String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white),
-      ),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
   AlertDialog showAlertDialog(id) {
     return AlertDialog(
       title: const Text('Delete?'),
-      content: const Text(
-          'The content will be deleted forever'),
+      content: const Text('The content will be deleted forever'),
       actions: [
         ElevatedButton(
-          onPressed: ()  {
+          onPressed: () {
             deleteById(id);
             Navigator.pop(context);
           },
@@ -199,6 +188,4 @@ final isSuccess = await DoctorsService.deleteById(id);
       ],
     );
   }
-
-
 }

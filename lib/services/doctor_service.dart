@@ -22,6 +22,30 @@ import 'package:http/http.dart' as http;
        return null;
      }
     }
+
+   static Future<bool> updateData(String id, Map body) async {
+     final url = 'http://10.0.2.2:8080/clinic/api/doctor/update/$id';
+     final uri = Uri.parse(url);
+     final response = await http.put(
+       uri,
+       body: jsonEncode(body),
+       headers: {'Content-Type': 'application/json'},
+     );
+   return response.statusCode == 200;
+   }
+
+   static Future<bool> createData(Map body) async {
+     final url = 'http://10.0.2.2:8080/clinic/api/doctor/save';
+     final uri = Uri.parse(url);
+     final response = await http.post(
+       uri,
+       body: jsonEncode(body),
+       headers: {'Content-Type': 'application/json'},
+     );
+     return response.statusCode == 200;
+
+   }
+
  }
 
 

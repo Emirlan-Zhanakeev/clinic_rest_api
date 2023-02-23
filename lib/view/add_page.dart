@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:clinic_rest/services/doctor_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../utils/snackbar_helper.dart';
 import 'package:http/http.dart' as http;
 
 class AddPage extends StatefulWidget {
@@ -109,91 +111,49 @@ class _AddPageState extends State<AddPage> {
       print('You can not call updated without todo data');
       return;
     }
-    final id = todo['id'];
-    final name = nameController.text;
-    final surname = surnameController.text;
-    final birthday = birthdayController.text;
-    final speciality = specialityController.text;
-
-    final body = {
-      "name": name,
-      "surname": surname,
-      "birthday": birthday,
-      "speciality": speciality
-    };
-    // http://localhost:8080/clinic/api/doctor/update/45
-    final url = 'http://10.0.2.2:8080/clinic/api/doctor/update/$id';
-    final uri = Uri.parse(url);
-    final response = await http.put(
-      uri,
-      body: jsonEncode(body),
-      headers: {'Content-Type': 'application/json'},
-    );
+    final id = todo['id'].toString();
+    final isSuccess = await DoctorsService.updateData(id, body);
 
     ///Show success
-    if (response.statusCode == 200) {
-      nameController.text = '';
-      surnameController.text = '';
-      birthdayController.text = '';
-      specialityController.text = '';
-      showSuccessMessage('Updation Success');
+    if (isSuccess) {
+      showSuccessMessage(context, message:'Updation Success');
     } else {
-      showErrorMessage('Updation Failed');
-    }
+      showErrorMessage(context, message: 'Updation Failed');    }
     Navigator.pop(context);
 
   }
 
   void submitData() async {
+    ///Submit data to server
+
+    final isSuccess = await DoctorsService.createData(body);
+
+    ///Show success
+    if (isSuccess) {
+      nameController.text = '';
+      surnameController.text = '';
+      birthdayController.text = '';
+      specialityController.text = '';
+      showSuccessMessage(context, message:'Creation Success');
+    } else {
+      showErrorMessage(context, message: 'Creation Failed');
+    }
+    Navigator.pop(context);
+  }
+
+  Map get body {
     ///Get the data from form
     final name = nameController.text;
     final surname = surnameController.text;
     final birthday = birthdayController.text;
     final speciality = specialityController.text;
 
-    final body = {
+    return {
       "name": name,
       "surname": surname,
       "birthday": birthday,
       "speciality": speciality
     };
-
-    ///Submit data to server
-    final url = 'http://10.0.2.2:8080/clinic/api/doctor/save';
-    final uri = Uri.parse(url);
-    final response = await http.post(
-      uri,
-      body: jsonEncode(body),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    ///Show success
-    if (response.statusCode == 200) {
-      nameController.text = '';
-      surnameController.text = '';
-      birthdayController.text = '';
-      specialityController.text = '';
-      showSuccessMessage('Creation Success');
-    } else {
-      showErrorMessage('Creation Failed');
-    }
-    Navigator.pop(context);
-
   }
 
-  void showSuccessMessage(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  void showErrorMessage(String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white),
-      ),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
 }
