@@ -162,11 +162,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void showSuccessMessage(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
   AlertDialog showAlertDialog(id) {
     return AlertDialog(
       title: const Text('Delete?'),

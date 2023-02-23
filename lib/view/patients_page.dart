@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:clinic_rest/services/patient_services.dart';
+import 'package:clinic_rest/utils/snackbar_helper.dart';
 import 'package:clinic_rest/view/add_patient_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,13 +25,12 @@ class _PatientsPageState extends State<PatientsPage> {
 
   ///Get all data
   Future<void> fetchPatient() async {
-    const url = 'http://10.0.2.2:8080/clinic/api/patient/all';
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body) as List;
+    final response = await PatientService.fetchDoctors();
+
+    if (response != null) {
+      // final json = jsonDecode(response.body) as List;
       setState(() {
-        patients = json;
+        patients = response;
       });
     }
     setState(() {
@@ -39,21 +40,21 @@ class _PatientsPageState extends State<PatientsPage> {
 
   Future<void> deletePats(id) async {
     ///Delete the doc
-    final url = 'http://10.0.2.2:8080/clinic/api/patient/delete/$id';
-    final uri = Uri.parse(url);
-    final response = await http.delete(uri);
-    if (response.statusCode == 200) {
+
+    final isSuccess = await PatientService.deleteById(id);
+
+    if (isSuccess) {
       ///Remove doc from the List
       final filtered =
-      patients.where((element) => element['id'] != id).toList();
+          patients.where((element) => element['id'] != id).toList();
       setState(() {
         patients = filtered;
       });
       fetchPatient();
-      // showSuccessMessage('Deletion Success');
+      showSuccessMessage(context, message: "Deletion Success");
     } else {
       ///Show error
-      showErrorMessage('Deletion Filed');
+      showErrorMessage(context, message: "Deletion Failed");
     }
   }
 
@@ -78,8 +79,27 @@ class _PatientsPageState extends State<PatientsPage> {
     fetchPatient();
   }
 
-
-
+  AlertDialog ShowAlertDialog(id) {
+    return AlertDialog(
+      title: const Text('Delete?'),
+      content: const Text('The content will be deleted forever'),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            deletePats(id);
+            Navigator.pop(context);
+          },
+          child: const Text('Yes'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('No'),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,9 +138,11 @@ class _PatientsPageState extends State<PatientsPage> {
                           navigationToPatientEdit(pats);
                         } else if (value == 'delete') {
                           ///delete pats
-                          showDialog(context: context, builder: (builder) {
-                          return ShowAlertDialog(id);
-                          });
+                          showDialog(
+                              context: context,
+                              builder: (builder) {
+                                return ShowAlertDialog(id);
+                              });
                         }
                       },
                       itemBuilder: (BuildContext context) {
@@ -146,46 +168,4 @@ class _PatientsPageState extends State<PatientsPage> {
       ),
     );
   }
-
-  void showSuccessMessage(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  void showErrorMessage(String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white),
-      ),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  AlertDialog ShowAlertDialog(id) {
-    return AlertDialog(
-      title: const Text('Delete?'),
-      content: const Text(
-          'The content will be deleted forever'),
-      actions: [
-        ElevatedButton(
-          onPressed: ()  {
-            deletePats(id);
-             Navigator.pop(context);
-          },
-          child: const Text('Yes'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('No'),
-        ),
-      ],
-    );
-  }
-
-
-
 }
