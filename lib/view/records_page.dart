@@ -27,15 +27,50 @@ class _RecordsPageState extends State<RecordsPage> {
     } else {
       showErrorMessage(context, message: 'Something wrong');
     }
+    ///for quick update
     setState(() {
       isLoading = false;
     });
   }
 
+  ///Delete
+  Future<void> deleteById(String id) async {
+
+    final url = 'http://10.0.2.2:8080/clinic/api/record/delete/$id';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    if (response.statusCode == 200) {
+      ///Remove doc from the List
+      final filtered = records.where((element) => element['id'] != id).toList();
+      setState(() {
+        records = filtered;
+      });
+      fetchRecords();
+      showSuccessMessage(context, message: 'Deletion Success');
+    } else {
+      ///Show error
+      showErrorMessage(context, message: 'Something wrong');
+    }
+  }
+
+
   Future<void> navigateToAddRecordPage() async {
     final route = MaterialPageRoute(builder: (context) => const AddRecord());
     await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
   }
+
+
+  Future<void> navigateToEditRecordPage(Map item) async {
+    final route = MaterialPageRoute(builder: (context) => AddRecord(todo: item));
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+      fetchRecords();
+    });  }
+
 
   @override
   void initState() {
@@ -84,27 +119,27 @@ class _RecordsPageState extends State<RecordsPage> {
                       trailing: PopupMenuButton(
                         onSelected: (value) {
                           if (value == 'edit') {
-                            // navigateToEditPage(docs);
-
+                            navigateToEditRecordPage(record);
                             ///open edit page
                           } else if (value == 'delete') {
                             ///delete doc
-                            // showDialog(
-                            //     context: context,
-                            //     builder: (builder) {
-                            //       return showAlertDialog(id);
-                            //     });
+                            // deleteById(id);
+                            showDialog(
+                                context: context,
+                                builder: (builder) {
+                                  return showAlertDialog(id);
+                                });
                           }
                         },
                         itemBuilder: (BuildContext context) {
                           return [
                             const PopupMenuItem(
                               value: 'edit',
-                              child: Text('Edit doctor'),
+                              child: Text('Edit record'),
                             ),
                             const PopupMenuItem(
                               value: 'delete',
-                              child: Text('Delete doctor'),
+                              child: Text('Delete record'),
                             ),
                           ];
                         },
@@ -121,7 +156,6 @@ class _RecordsPageState extends State<RecordsPage> {
     );
   }
 
-/*
   AlertDialog showAlertDialog(id) {
     return AlertDialog(
       title: const Text('Delete?'),
@@ -143,5 +177,4 @@ class _RecordsPageState extends State<RecordsPage> {
       ],
     );
   }
-*/
 }
