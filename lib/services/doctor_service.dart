@@ -1,5 +1,6 @@
  ///All API call here
  import 'dart:convert';
+ // ignore_for_file: avoid_print
 
 import 'package:http/http.dart' as http;
 
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
      final response = await http.delete(uri);
      return response.statusCode == 200;
    }
+
    static Future<List?> fetchDoctors() async {
      const url = 'http://10.0.2.2:8080/clinic/api/doctor/all';
      final uri = Uri.parse(url);

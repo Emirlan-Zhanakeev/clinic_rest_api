@@ -1,8 +1,10 @@
 import 'dart:convert';
+// ignore_for_file: avoid_print
 
 import 'package:clinic_rest/services/doctor_service.dart';
 import 'package:clinic_rest/view/add_page.dart';
 import 'package:clinic_rest/view/patients_page.dart';
+import 'package:clinic_rest/view/records_page.dart';
 import 'package:flutter/material.dart';
 import '../utils/snackbar_helper.dart';
 
@@ -28,6 +30,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          IconButton(
+            icon: const Icon(Icons.record_voice_over_sharp),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const RecordsPage(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.perm_contact_calendar_outlined),
             onPressed: () {
@@ -70,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                   return Card(
                     child: ListTile(
                       title: Text('${docs['name']}  ${docs['surname']}'),
-                      leading: CircleAvatar(child: Text('${index + 1}')),
+                      leading: CircleAvatar(child: Text('${docs['id']}')),
                       subtitle: Text(docs['birthday'].toString()),
                       trailing: PopupMenuButton(
                         onSelected: (value) {

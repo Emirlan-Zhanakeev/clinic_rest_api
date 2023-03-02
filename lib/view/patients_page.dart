@@ -129,7 +129,7 @@ class _PatientsPageState extends State<PatientsPage> {
                 return Card(
                   child: ListTile(
                     title: Text('${pats['name']}  ${pats['surname']}'),
-                    leading: CircleAvatar(child: Text('${index + 1}')),
+                    leading: CircleAvatar(child: Text('${pats['id']}')),
                     subtitle: Text(pats['birthday'].toString()),
                     trailing: PopupMenuButton(
                       onSelected: (value) {
